@@ -15,7 +15,7 @@ import { fromEvent, merge } from 'rxjs';
 import { debounceTime, filter, switchMap, tap } from 'rxjs/operators';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 
-import { GridUtils } from '@sdk/smart-table/utils';
+import { GridUtils } from '@sdk/smart-grid/utils';
 
 import {
   ExtendedColDef,
@@ -28,7 +28,7 @@ import {
 import { SdkGridFeatureBaseDirective } from '../../feature-base.directive';
 import { SDK_GRID_FEATURE } from '../../tokens';
 import { SmartGridRendererWithLoadingComponent } from '../../components';
-import { SmartGridComponent } from './smart-table.component';
+import { SmartGridComponent } from './smart-grid.component';
 
 @UntilDestroy()
 @Component({
