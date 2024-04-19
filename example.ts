@@ -15,31 +15,31 @@ import { fromEvent, merge } from 'rxjs';
 import { debounceTime, filter, switchMap, tap } from 'rxjs/operators';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 
-import { GridUtils } from '@tm/sdk/smart-table/utils';
+import { GridUtils } from '@sdk/smart-table/utils';
 
 import {
   ExtendedColDef,
-  SmartTableColumn,
-  SmartTableFeatureSetupOptions,
-  SmartTableHybridServerSideDataSourceOptions,
-  SmartTableSortingOrder,
+  SmartGridColumn,
+  SmartGridFeatureSetupOptions,
+  SmartGridHybridServerSideDataSourceOptions,
+  SmartGridSortingOrder,
 } from '../../model';
 
-import { TmSdkGridFeatureBaseDirective } from '../../feature-base.directive';
-import { TM_SDK_GRID_FEATURE } from '../../tokens';
-import { SmartTableRendererWithLoadingComponent } from '../../components';
-import { SmartTableComponent } from './smart-table.component';
+import { SdkGridFeatureBaseDirective } from '../../feature-base.directive';
+import { SDK_GRID_FEATURE } from '../../tokens';
+import { SmartGridRendererWithLoadingComponent } from '../../components';
+import { SmartGridComponent } from './smart-table.component';
 
 @UntilDestroy()
 @Component({
-  selector: 'tm-sdk-smart-table-hybrid-server-side',
+  selector: 'sdk-smart-grid-hybrid-server-side',
   template: '',
   providers:[
-    { provide: TM_SDK_GRID_FEATURE, useExisting: SmartTableHybridServerSideComponent },
+    { provide: SDK_GRID_FEATURE, useExisting: SmartGridHybridServerSideComponent },
   ],
 })
-export class SmartTableHybridServerSideComponent<TableEntity> extends TmSdkGridFeatureBaseDirective {
-  @Input() dataSourceOptions: SmartTableHybridServerSideDataSourceOptions<TableEntity>;
+export class SmartGridHybridServerSideComponent<TableEntity> extends SdkGridFeatureBaseDirective {
+  @Input() dataSourceOptions: SmartGridHybridServerSideDataSourceOptions<TableEntity>;
 
   private columnApi: ColumnApi;
   private gridApi: GridApi;
@@ -49,7 +49,7 @@ export class SmartTableHybridServerSideComponent<TableEntity> extends TmSdkGridF
     hierarchyStructure: ['loading' + i],
   }));
 
-  constructor(@Host() private smartTable: SmartTableComponent) {
+  constructor(@Host() private SmartGrid: SmartGridComponent) {
     super();
   }
 
@@ -62,12 +62,12 @@ export class SmartTableHybridServerSideComponent<TableEntity> extends TmSdkGridF
     this.observeShortPollingLoading();
   }
 
-  getFeatureSetup(tableId?: string): SmartTableFeatureSetupOptions {
+  getFeatureSetup(tableId?: string): SmartGridFeatureSetupOptions {
     const featureToken = 'loadingRowDroppedFromFilteringIds';
 
     return {
       frameworkComponents: {
-        BasicRenderer: SmartTableRendererWithLoadingComponent,
+        BasicRenderer: SmartGridRendererWithLoadingComponent,
       },
       gridOptions: {
         isRowSelectable: (node: RowNode) => !node.data?.loading,
@@ -79,7 +79,7 @@ export class SmartTableHybridServerSideComponent<TableEntity> extends TmSdkGridF
   }
 
   private updateColumns(): void {
-    const autoGroupColDef = this.smartTable.gridOptions.autoGroupColumnDef;
+    const autoGroupColDef = this.SmartGrid.gridOptions.autoGroupColumnDef;
     const columns = this.columnApi.getAllColumns();
     const updatedAutoGroupColDef = {
       ...autoGroupColDef,
@@ -88,7 +88,7 @@ export class SmartTableHybridServerSideComponent<TableEntity> extends TmSdkGridF
       colSpan: ({ node }: ColSpanParams) => node.data?.loading ? (columns.length + 1) : 1,
       cellClassRules: {
         ...autoGroupColDef.cellClassRules,
-        'tm-loading-cell': (cellParams: CellClassParams) => cellParams.data?.loading,
+        '-loading-cell': (cellParams: CellClassParams) => cellParams.data?.loading,
       },
       comparator: this.dummyComparator,
     };
@@ -145,20 +145,20 @@ export class SmartTableHybridServerSideComponent<TableEntity> extends TmSdkGridF
       const maxCharCode = 10000;
 
       if (valueGetterParams.data?.loading) {
-        return correspondingColumnState?.sort === SmartTableSortingOrder.ASC
+        return correspondingColumnState?.sort === SmartGridSortingOrder.ASC
           ? String.fromCharCode(maxCharCode)
           : String.fromCharCode(0);
       }
 
       return (<(params: ValueGetterParams) => string> colDef.valueGetter)(valueGetterParams)
-        ?? (correspondingColumnState?.sort === SmartTableSortingOrder.ASC
+        ?? (correspondingColumnState?.sort === SmartGridSortingOrder.ASC
           ? String.fromCharCode(maxCharCode)
           : String.fromCharCode(0));
     };
   }
 
   /** Designed to avoid `✐` that symbol caused by `getValueGetterFn` method on user copy to clipboard event at loading rows. */
-  private getClipboardGetterFn({ clipboardValueGetter, valueGetter }: ExtendedColDef): SmartTableColumn['clipboardValueGetter'] {
+  private getClipboardGetterFn({ clipboardValueGetter, valueGetter }: ExtendedColDef): SmartGridColumn['clipboardValueGetter'] {
     return (params: ProcessCellForExportParams): unknown => {
       if (clipboardValueGetter) {
         return clipboardValueGetter(params);
